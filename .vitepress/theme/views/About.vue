@@ -41,17 +41,17 @@
       <div class="about-item career">
         <span class="tip">生涯</span>
         <span class="title2">
-          <i>無限進步</i>
+          <i>無限進步</i> 
         </span>
         <div class="list">
           <span class="list-item" style="--color: #357ef5">SWUST · 计算机科学与技术</span>
           
         </div>
-        <img
-          class="career-img"
-          src="https://pic.efefee.cn/uploads/2024/02/22/65d71db18bcf9.png"
-          alt="career"
-        />
+<!--        <img-->
+<!--          class="career-img"-->
+<!--          src="https://pic.efefee.cn/uploads/2024/02/22/65d71db18bcf9.png"-->
+<!--          alt="career"-->
+<!--        />-->
       </div>
     </div>
     <div class="about-content" style="grid-template-columns: 3fr 2fr">
@@ -142,7 +142,7 @@
       <div class="about-item child">
         <div
           class="about-item map image"
-          style="background-image:url('../../../public/images/logo/img.png')"
+          style="background-image:url('https://s2.loli.net/2025/01/05/sHkoUeF3PCEli1N.png')"
         >
           <span class="position">我现在住在 <strong>中国，四川省</strong></span>
         </div>
