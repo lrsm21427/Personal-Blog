@@ -22,7 +22,7 @@ const linkData = [
     typeList: [
       {
         name: "R",
-        avatar: "/images/logo/logo.png",
+        avatar: "/images/logo/logo-1.png",
         desc: "分享技术与科技生活",
         url: "",
       },

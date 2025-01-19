@@ -34,7 +34,7 @@ export const getSiteInfo = async (url) => {
     if (iconLink) {
       details.iconUrl = new URL(iconLink.getAttribute("href"), url).href;
     } else {
-      details.iconUrl = new URL("/logo.png", url).href;
+      details.iconUrl = new URL("/logo-1.png", url).href;
     }
     // 获取描述
     const metaDescription = doc.querySelector("meta[name='description']");

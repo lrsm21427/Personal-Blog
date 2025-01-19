@@ -3,13 +3,15 @@
     <div class="footer-content">
       <div class="copyright">
 <!--        <span class="time">@ 2025- {{ thisYear }} By </span>-->
-        <a :href="theme.siteMeta.author.link" class="author link" target="_blank">
-          {{ theme.siteMeta.author.name }}
-        </a>
+<!--        <a :href="theme.siteMeta.author.link" class="author link" target="_blank">-->
+<!--          {{ theme.siteMeta.author.name }}-->
+<!--        </a>-->
         <a class="icp link" href="https://beian.miit.gov.cn/" target="_blank">
           <i class="iconfont icon-safe" />
           {{ theme.icp }}
         </a>
+        
+        <a  href="https://beian.mps.gov.cn/#/query/webSearch?code=51070002110059" rel="noreferrer" target="_blank"><img style="height: 16px" src="../../../public/images/logo/备案图标.png">川公网安备51070002110059号</a>
       </div>
       <div class="meta">
         <a class="power link" href="https://vitepress.dev/" target="_blank">

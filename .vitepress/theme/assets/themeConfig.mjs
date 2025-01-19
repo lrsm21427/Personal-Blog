@@ -7,21 +7,21 @@ export const themeConfig = {
     // 站点描述
     description: "Hello World!",
     // 站点logo
-    logo: "/images/logo/logo.png",
+    logo: "/images/logo/logo-1.png",
     // 站点地址
-    site: "",
+    site: "lrnp666.cn",
     // 语言
     lang: "zh-CN",
     // 作者
     author: {
       name: "刘瑞",
-      cover: "/images/logo/logo.png",
+      cover: "/images/logo/logo-1.png",
       email: "lrsm@2wr47b.onmicrosoft.com",
       link: "",
     },
   },
   // 备案信息
-  icp: "",
+  icp: "蜀ICP备2025119518号-1",
   // 建站日期
   since: "2025-1-1",
   // 每页文章数据
@@ -32,7 +32,7 @@ export const themeConfig = {
     // https://vitepress.dev/zh/reference/site-config#head
     header: [
       // favicon
-      ["link", { rel: "icon", href: "/favicon.ico" }],
+      ["link", { rel: "icon", href: "/logo-1.png" }],
       // RSS
       [
         "link",
@@ -148,7 +148,7 @@ export const themeConfig = {
       name: "博客",
       list: [
         {
-          icon: "/images/logo/logo.png",
+          icon: "/images/logo/logo-1.png",
           name: "主站",
           url: "/",
         },
@@ -163,12 +163,12 @@ export const themeConfig = {
       name: "服务",
       list: [
         {
-          icon: "/images/logo/logo.png",
+          icon: "/images/logo/logo-1.png",
           name: "起始页",
           url: "https://nav.imsyy.top/",
         },
         {
-          icon: "/images/logo/logo.png",
+          icon: "/images/logo/logo-1.png",
           name: "今日热榜",
           url: "https://hot.imsyy.top/",
         },
@@ -183,7 +183,7 @@ export const themeConfig = {
       name: "项目",
       list: [
         {
-          icon: "/images/logo/logo.png",
+          icon: "/images/logo/logo-1.png",
           name: "彝绣",
           url: "https://github.com/lrsm21427/yixiu",
         },
@@ -214,27 +214,19 @@ export const themeConfig = {
     social: [
       {
         icon: "email",
-        link: "mailto:one@imsyy.top",
+        link: "",
       },
       {
         icon: "github",
-        link: "https://www.github.com/imsyy/",
-      },
-      {
-        icon: "telegram",
-        link: "https://t.me/bottom_user",
+        link: "https://www.github.com/lrsm21427/",
       },
       {
         icon: "bilibili",
-        link: "https://space.bilibili.com/98544142",
+        link: "https://space.bilibili.com",
       },
       {
         icon: "qq",
-        link: "https://res.abeim.cn/api/qq/?qq=1539250352",
-      },
-      {
-        icon: "twitter-x",
-        link: "https://twitter.com/iimmsyy",
+        link: "https://res.abeim.cn/api/qq/?qq=1686180008",
       },
     ],
     // sitemap
@@ -275,11 +267,11 @@ export const themeConfig = {
         text: "服务",
         items: [
           // { text: "站点状态", link: "https://status.imsyy.top/", newTab: true },
-          { text: "一个导航", link: "https://nav.imsyy.top/", newTab: true },
+          // { text: "一个导航", link: "https://nav.imsyy.top/", newTab: true },
           // { text: "站点订阅", link: "https://blog.imsyy.top/rss.xml", newTab: true },
           {
             text: "反馈投诉",
-            link: "https://eqnxweimkr5.feishu.cn/share/base/form/shrcnCXCPmxCKKJYI3RKUfefJre",
+            link: "",
             newTab: true,
           },
         ],
