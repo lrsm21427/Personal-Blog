@@ -106,16 +106,22 @@ export default withPwa(
       },
       // 服务器
       server: {
-        port: 9877,
+        port: 8088,
       },
       // 构建
       build: {
+        target: 'es2020',
         minify: "terser",
         terserOptions: {
           compress: {
             pure_funcs: ["console.log"],
           },
         },
+      },
+      optimizedeps: {
+        esbuildoptions: {
+          target: 'es2020'
+        }
       },
     },
     // PWA

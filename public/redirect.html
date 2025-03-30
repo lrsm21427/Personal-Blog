@@ -186,15 +186,18 @@
       const jumpButton = document.getElementById("jump-button");
       // 网址白名单
       const whitelist = [
-        "*.imsyy.top",
         "gitee.com",
         "github.com",
         "*.baidu.com",
         "*.bing.cn",
         "npmjs.com",
+        "beian.*.gov.cn"
       ];
       // 网址黑名单
-      const blacklist = ["*.taobao.com", "*.jd.com"];
+      const blacklist = [
+        "*.taobao.com", 
+        "*.jd.com"
+      ];
       // 提示文本
       const tipText = {
         safe: "✅ 该网址为信任网址，即将跳转",

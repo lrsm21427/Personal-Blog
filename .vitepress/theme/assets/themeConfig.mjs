@@ -22,6 +22,7 @@ export const themeConfig = {
   },
   // 备案信息
   icp: "蜀ICP备2025119518号-1",
+  ga:"川公网安备51070002110059号",
   // 建站日期
   since: "2025-1-1",
   // 每页文章数据
@@ -322,7 +323,7 @@ export const themeConfig = {
       // 倒计时日期
       data: {
         name: "春节",
-        date: "2025-01-29",
+        date: "2026-02-17",
       },
     },
     // 站点数据
@@ -383,6 +384,7 @@ export const themeConfig = {
       "cf-friends-link",
       "upyun",
       "icp",
+      "galink",
       "author",
       "rss",
       "cc",

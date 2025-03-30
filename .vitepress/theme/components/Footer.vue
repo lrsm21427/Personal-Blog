@@ -10,8 +10,10 @@
           <i class="iconfont icon-safe" />
           {{ theme.icp }}
         </a>
-        
-        <a  href="https://beian.mps.gov.cn/#/query/webSearch?code=51070002110059" rel="noreferrer" target="_blank"><img style="height: 16px" src="../../../public/images/logo/备案图标.png">川公网安备51070002110059号</a>
+        <a class="galink" href="https://beian.mps.gov.cn/#/query/webSearch?code=51070002110059" rel="noreferrer" target="_blank">
+          <img style="height: 14px" src="/images/logo/ga.png">
+          {{ theme.ga }}
+        </a> 
       </div>
       <div class="meta">
         <a class="power link" href="https://vitepress.dev/" target="_blank">
@@ -105,6 +107,9 @@ onBeforeUnmount(() => {
           opacity: 0.6;
         }
       }
+      .ga {
+        
+      }
       .upyun {
         .iconfont {
           font-size: 20px;
@@ -159,6 +164,30 @@ onBeforeUnmount(() => {
         margin-right: 4px;
         transition: color 0.3s;
       }
+      &:hover {
+        color: var(--main-color);
+        background-color: var(--main-color-bg);
+        .iconfont {
+          color: var(--main-color);
+        }
+      }
+    }
+    .galink {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      font-weight: bold;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 10px;
+      margin: 0 2px;
+      height: 38px;
+      border-radius: 12px;
+      transition:
+        color 0.3s,
+        background-color 0.3s;
+      cursor: pointer;
       &:hover {
         color: var(--main-color);
         background-color: var(--main-color-bg);
