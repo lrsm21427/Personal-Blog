@@ -30,6 +30,8 @@ export default withPwa(
     cleanUrls: true,
     // 最后更新时间戳
     lastUpdated: true,
+    // 修改为你想要的路径（如 `../dist` 或 `../public`）
+    outDir: "D:/blog/dist",
     // 主题
     appearance: "dark",
     // Head

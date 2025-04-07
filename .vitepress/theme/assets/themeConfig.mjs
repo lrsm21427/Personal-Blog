@@ -188,6 +188,11 @@ export const themeConfig = {
           name: "彝绣",
           url: "https://github.com/lrsm21427/yixiu",
         },
+        {
+          icon: "/images/logo/logo-1.png",
+          name: "考研辅助志愿",
+          url: "https://github.com/lrsm21427/Graduate-entrance-examination-auxiliary-management-system",
+        },
       ],
     },
   ],
@@ -245,6 +250,7 @@ export const themeConfig = {
         text: "项目",
         items: [
           { text: "彝绣", link: "https://github.com/lrsm21427/yixiu", newTab: true },
+          { text: "考研辅助系统", link: "https://github.com/lrsm21427/Graduate-entrance-examination-auxiliary-management-system", newTab: true },
         ],
       },
       {
