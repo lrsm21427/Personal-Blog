@@ -149,7 +149,7 @@ export const themeConfig = {
       name: "博客",
       list: [
         {
-          icon: "/images/logo/logo-1.png",
+          icon: "/images/logo/favicon.ico",
           name: "主站",
           url: "/",
         },
@@ -164,12 +164,12 @@ export const themeConfig = {
       name: "服务",
       list: [
         {
-          icon: "/images/logo/logo-1.png",
+          icon: "/images/logo/favicon.ico",
           name: "起始页",
           url: "https://nav.imsyy.top/",
         },
         {
-          icon: "/images/logo/logo-1.png",
+          icon: "/images/logo/favicon.ico",
           name: "今日热榜",
           url: "https://hot.imsyy.top/",
         },
@@ -184,12 +184,12 @@ export const themeConfig = {
       name: "项目",
       list: [
         {
-          icon: "/images/logo/logo-1.png",
+          icon: "/images/logo/favicon.ico",
           name: "彝绣",
           url: "https://github.com/lrsm21427/yixiu",
         },
         {
-          icon: "/images/logo/logo-1.png",
+          icon: "/images/logo/favicon.ico",
           name: "考研辅助志愿",
           url: "https://github.com/lrsm21427/Graduate-entrance-examination-auxiliary-management-system",
         },
@@ -372,9 +372,9 @@ export const themeConfig = {
   rewardData: {
     enable: true,
     // 微信二维码
-    wechat: "",
+    wechat: "/images/logo/wechat.png",
     // 支付宝二维码
-    alipay: "",
+    alipay: "/images/logo/alipay.jpg",
   },
   // 图片灯箱
   fancybox: {
