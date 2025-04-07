@@ -7,7 +7,7 @@ export const themeConfig = {
     // 站点描述
     description: "Hello World!",
     // 站点logo
-    logo: "/images/logo/logo-1.png",
+    logo: "/images/logo/favicon.ico",
     // 站点地址
     site: "lrnp666.cn",
     // 语言
