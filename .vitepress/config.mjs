@@ -31,7 +31,7 @@ export default withPwa(
     // 最后更新时间戳
     lastUpdated: true,
     // 修改为你想要的路径（如 `../dist` 或 `../public`）
-    outDir: "/home/dist",
+    outDir: "../dist",
     // 主题
     appearance: "dark",
     // Head
