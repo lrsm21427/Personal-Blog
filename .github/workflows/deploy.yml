@@ -2,7 +2,8 @@ name: Deploy to Server
 
 on:
   push:
-    branches:[ master ]    # 注意是main分支还是master分支
+    branches:
+      - master    # 注意是main分支还是master分支
 
 jobs:
   build-and-deploy:
@@ -40,8 +41,3 @@ jobs:
             .vitepress/dist/*
             ../dist/*
           target: "/home/dist"
-          overwrite: true
-          strip_components: 1
-          # 高级选项
-          tar_tmp_path: "/tmp/deploy"
-          debug: true
