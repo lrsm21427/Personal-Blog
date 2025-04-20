@@ -9,7 +9,7 @@ export const themeConfig = {
     // 站点logo
     logo: "/images/logo/favicon.ico",
     // 站点地址
-    site: "lrnp666.cn",
+    site: "https://lrnp666.cn",
     // 语言
     lang: "zh-CN",
     // 作者
