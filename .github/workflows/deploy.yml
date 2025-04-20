@@ -22,13 +22,7 @@ jobs:
         run: |
           npm install
           npm run build
-          # 关键验证步骤
-          echo "构建输出验证："
-          ls -la .vitepress/dist || echo "默认输出目录不存在"
-          ls -la ../dist || echo "自定义输出目录不存在"
-          [ -d ".vitepress/dist" ] && find .vitepress/dist -type f | head -5
-          [ -d "../dist" ] && find ../dist -type f | head -5
-
+          
       - name: Deploy to Server
         uses: appleboy/scp-action@v0.1.5
         # see https://github.com/appleboy/scp-action/tree/v0.1.5/
