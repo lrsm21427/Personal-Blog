@@ -37,7 +37,5 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
-          source: |
-            .vitepress/dist/*
-            ../dist/*
+          source: ".vitepress/dist"
           target: "/home/dist"
