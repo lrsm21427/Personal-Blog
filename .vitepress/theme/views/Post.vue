@@ -121,7 +121,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "../style/post.scss";
+//@import "../style/post.scss";
 
 .post {
   width: 100%;

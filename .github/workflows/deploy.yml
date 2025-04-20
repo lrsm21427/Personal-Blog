@@ -2,8 +2,7 @@ name: Deploy to Server
 
 on:
   push:
-    branches:
-      - master    # 注意是main分支还是master分支
+    branches:[ master ]    # 注意是main分支还是master分支
 
 jobs:
   build-and-deploy:
@@ -22,6 +21,12 @@ jobs:
         run: |
           npm install
           npm run build
+          # 关键验证步骤
+          echo "构建输出验证："
+          ls -la .vitepress/dist || echo "默认输出目录不存在"
+          ls -la ../dist || echo "自定义输出目录不存在"
+          [ -d ".vitepress/dist" ] && find .vitepress/dist -type f | head -5
+          [ -d "../dist" ] && find ../dist -type f | head -5
 
       - name: Deploy to Server
         uses: appleboy/scp-action@v0.1.5
@@ -31,5 +36,12 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
-          source: "../dist/*"
+          source: |
+            .vitepress/dist/*
+            ../dist/*
           target: "/home/dist"
+          overwrite: true
+          strip_components: 1
+          # 高级选项
+          tar_tmp_path: "/tmp/deploy"
+          debug: true
