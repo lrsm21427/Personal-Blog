@@ -171,7 +171,7 @@ export const themeConfig = {
         {
           icon: "/images/logo/favicon.ico",
           name: "今日热榜",
-          url: "https://hot.imsyy.top/",
+          url: "https://lrnp666.top/",
         },
         // {
         //   icon: "https://pic.efefee.cn/uploads/2024/04/08/66134722586fa.png",
