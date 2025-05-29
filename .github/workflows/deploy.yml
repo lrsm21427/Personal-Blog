@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - master
+      - master    # 注意是main分支还是master分支
 
 jobs:
   build-and-deploy:
@@ -16,22 +16,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "16"  # 注意你项目的node版本
 
       - name: Install dependencies and build
         run: |
           npm install
           npm run build
-
-      - name: Show build output
-        run: ls -R
-
+          
       - name: Deploy to Server
         uses: appleboy/scp-action@v0.1.5
+        # see https://github.com/appleboy/scp-action/tree/v0.1.5/
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
-          source: "dist"
+          source: ".vitepress/dist"
           target: "/home/dist"
