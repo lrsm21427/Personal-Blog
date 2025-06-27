@@ -30,6 +30,8 @@ export default withPwa(
     cleanUrls: true,
     // 最后更新时间戳
     lastUpdated: true,
+    // // 修改为你想要的路径（如 `../dist` 或 `../public`）
+    // outDir: ".vitepress/dist",
     // 主题
     appearance: "dark",
     // Head
@@ -106,16 +108,22 @@ export default withPwa(
       },
       // 服务器
       server: {
-        port: 9877,
+        port: 8088,
       },
       // 构建
       build: {
+        target: 'es2020',
         minify: "terser",
         terserOptions: {
           compress: {
             pure_funcs: ["console.log"],
           },
         },
+      },
+      optimizedeps: {
+        esbuildoptions: {
+          target: 'es2020'
+        }
       },
     },
     // PWA
