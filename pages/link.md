@@ -28,7 +28,7 @@ import Link from "@/views/Link.vue";
 - 站点图片：
 
 ```yml
-name: R小栈
+name: rayBot小栈
 desc: 分享技术与生活
 url: 
 avatar: 
