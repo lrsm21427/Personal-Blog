@@ -1,297 +1,392 @@
 <template>
-  <div class="dino-game s-card">
-    <!-- 游戏区域 -->
-    <div class="game-area" @click="handleClick" @keydown.space.prevent="handleClick" tabindex="0">
-      <!-- 分数显示在左上角 -->
-      <div class="score-display">
-        {{ score }}
+  <section class="dino-game s-card" aria-label="恐龙跳跃小游戏">
+    <div
+      ref="gameAreaRef"
+      class="game-area"
+      :class="{ playing: gameState === 'playing', paused: gameState === 'paused' }"
+      role="button"
+      tabindex="0"
+      :aria-label="actionLabel"
+      @click="handleAction"
+      @keydown.space.prevent="handleAction"
+      @keydown.enter.prevent="handleAction"
+      @keydown.up.prevent="handleAction"
+    >
+      <div class="game-header" aria-live="polite">
+        <span>得分 {{ displayScore }}</span>
+        <span>最高 {{ bestScore }}</span>
       </div>
 
+      <button
+        v-if="gameState === 'playing' || gameState === 'paused'"
+        class="pause-button"
+        type="button"
+        :aria-label="gameState === 'paused' ? '继续游戏' : '暂停游戏'"
+        @click.stop="togglePause"
+      >
+        {{ gameState === "paused" ? "▶" : "Ⅱ" }}
+      </button>
+
+      <div class="cloud cloud-one" aria-hidden="true">☁</div>
+      <div class="cloud cloud-two" aria-hidden="true">☁</div>
+
       <div class="game-ground">
-        <!-- 恐龙 -->
         <div
           class="dino"
-          :class="{ jumping: isJumping, dead: gameState === 'over' }"
-          :style="{ bottom: 16 + dinoY + 'px' }"
+          :style="{ transform: `translate3d(0, ${-dinoY}px, 0)` }"
+          aria-hidden="true"
         >
-          {{ gameState === "over" ? "💀" : "🦕" }}
+          {{ gameState === "over" ? "💫" : "🦖" }}
         </div>
 
-        <!-- 障碍物 -->
         <div
           v-for="obstacle in obstacles"
           :key="obstacle.id"
           class="obstacle"
-          :style="{ left: obstacle.x + 'px' }"
+          :style="{ transform: `translate3d(${obstacle.x}px, 0, 0)` }"
+          aria-hidden="true"
         >
           🌵
         </div>
       </div>
 
-      <!-- 游戏提示 -->
       <div v-if="gameState !== 'playing'" class="game-tip">
-        {{ gameState === "ready" ? "点击开始" : "游戏结束" }}
+        <strong>{{ tipTitle }}</strong>
+        <span v-if="tipText">{{ tipText }}</span>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
-<script>
-export default {
-  name: "DinoGame",
-  data() {
-    return {
-      gameState: "ready", // ready, playing, over
-      score: 0,
-      dinoY: 0,
-      isJumping: false,
-      obstacles: [],
-      gameSpeed: 3,
-      gameLoop: null,
-      obstacleTimer: 0,
-      // 碰撞检测参数
-      dinoWidth: 30,
-      dinoHeight: 30,
-      obstacleWidth: 20,
-      obstacleHeight: 30,
-    };
-  },
-  computed: {
-    statusText() {
-      const statusMap = {
-        ready: "准备就绪",
-        playing: "游戏中",
-        over: "游戏结束",
-      };
-      return statusMap[this.gameState] || "";
-    },
-  },
-  methods: {
-    // 开始游戏
-    startGame() {
-      this.gameState = "playing";
-      this.score = 0;
-      this.dinoY = 0;
-      this.isJumping = false;
-      this.obstacles = [];
-      this.gameSpeed = 3;
-      this.obstacleTimer = 0;
+<script setup>
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 
-      this.gameLoop = setInterval(this.updateGame, 16); // 60fps
-    },
+const GROUND_Y = 16;
+const DINO_X = 20;
+const DINO_WIDTH = 30;
+const OBSTACLE_WIDTH = 22;
+const OBSTACLE_HEIGHT = 30;
+const GRAVITY = 1900;
+const JUMP_VELOCITY = 650;
+const BEST_SCORE_KEY = "dino-game-best-score";
 
-    // 恐龙跳跃
-    jump() {
-      if (this.gameState === "playing" && !this.isJumping) {
-        this.isJumping = true;
+const gameAreaRef = ref(null);
+const gameState = ref("ready");
+const score = ref(0);
+const bestScore = ref(0);
+const dinoY = ref(0);
+const velocityY = ref(0);
+const obstacles = ref([]);
 
-        // 使用更平滑的跳跃动画
-        const jumpHeight = 100;
-        const jumpDuration = 500;
-        const startTime = Date.now();
+let animationFrame = 0;
+let lastFrameTime = 0;
+let nextObstacleIn = 1.15;
+let obstacleId = 0;
+let resizeObserver;
+let gameWidth = 300;
 
-        const jumpAnimation = () => {
-          const elapsed = Date.now() - startTime;
-          const progress = elapsed / jumpDuration;
+const displayScore = computed(() => Math.floor(score.value));
+const actionLabel = computed(() => {
+  if (gameState.value === "playing") return "跳跃";
+  if (gameState.value === "paused") return "继续游戏";
+  return gameState.value === "over" ? "重新开始游戏" : "开始游戏";
+});
+const tipTitle = computed(() => {
+  if (gameState.value === "paused") return "游戏暂停";
+  if (gameState.value === "over") return `本局得分 ${displayScore.value}`;
+  return "点击开始";
+});
+const tipText = computed(() => {
+  if (gameState.value === "paused") return "点击或按空格继续";
+  if (gameState.value === "over") return "点击或按空格再来一局";
+  return "";
+});
 
-          if (progress < 1) {
-            // 使用抛物线函数计算跳跃高度
-            this.dinoY = jumpHeight * Math.sin(progress * Math.PI);
-            requestAnimationFrame(jumpAnimation);
-          } else {
-            this.dinoY = 0;
-            this.isJumping = false;
-          }
-        };
-
-        jumpAnimation();
-      }
-    },
-
-    // 更新游戏
-    updateGame() {
-      // 更新分数和速度
-      this.score++;
-      if (this.score % 200 === 0) {
-        this.gameSpeed = Math.min(this.gameSpeed + 0.5, 8);
-      }
-
-      // 移动障碍物
-      this.obstacles = this.obstacles
-        .map((obs) => ({ ...obs, x: obs.x - this.gameSpeed }))
-        .filter((obs) => obs.x > -this.obstacleWidth);
-
-      // 生成新障碍物
-      this.obstacleTimer++;
-      if (this.obstacleTimer > 80 + Math.random() * 60) {
-        this.obstacles.push({
-          id: Date.now(),
-          x: 350, // 从更远的地方开始
-        });
-        this.obstacleTimer = 0;
-      }
-
-      // 碰撞检测
-      if (this.checkCollision()) {
-        this.gameOver();
-      }
-    },
-
-    // 改进的碰撞检测
-    checkCollision() {
-      const dinoLeft = 20;
-      const dinoRight = dinoLeft + this.dinoWidth;
-      const dinoBottom = 16 + this.dinoY; // 恐龙底部位置
-      const dinoTop = dinoBottom + this.dinoHeight; // 恐龙顶部位置
-
-      return this.obstacles.some((obs) => {
-        const obsLeft = obs.x;
-        const obsRight = obs.x + this.obstacleWidth;
-        const obsBottom = 16; // 障碍物底部位置
-        const obsTop = obsBottom + this.obstacleHeight; // 障碍物顶部位置
-
-        // 检查水平重叠
-        const horizontalOverlap = dinoRight > obsLeft && dinoLeft < obsRight;
-
-        // 检查垂直重叠 - 只有当恐龙底部低于障碍物顶部时才算碰撞
-        const verticalOverlap = dinoBottom < obsTop;
-
-        return horizontalOverlap && verticalOverlap;
-      });
-    },
-
-    // 游戏结束
-    gameOver() {
-      this.gameState = "over";
-      clearInterval(this.gameLoop);
-    },
-
-    // 处理点击
-    handleClick() {
-      if (this.gameState === "ready" || this.gameState === "over") {
-        this.startGame();
-      } else if (this.gameState === "playing") {
-        this.jump();
-      }
-    },
-  },
-
-  beforeDestroy() {
-    if (this.gameLoop) {
-      clearInterval(this.gameLoop);
-    }
-  },
+const updateGameWidth = () => {
+  gameWidth = gameAreaRef.value?.clientWidth || 300;
 };
+
+const randomObstacleDelay = () => 0.9 + Math.random() * 0.75;
+
+const spawnObstacle = () => {
+  obstacles.value.push({ id: ++obstacleId, x: gameWidth + 24 });
+};
+
+const checkCollision = () =>
+  obstacles.value.some((obstacle) => {
+    const horizontalOverlap =
+      DINO_X + DINO_WIDTH - 5 > obstacle.x && DINO_X + 5 < obstacle.x + OBSTACLE_WIDTH;
+    const verticalOverlap = GROUND_Y + dinoY.value + 4 < GROUND_Y + OBSTACLE_HEIGHT;
+    return horizontalOverlap && verticalOverlap;
+  });
+
+const stopLoop = () => {
+  cancelAnimationFrame(animationFrame);
+  animationFrame = 0;
+  lastFrameTime = 0;
+};
+
+const finishGame = () => {
+  gameState.value = "over";
+  stopLoop();
+  const finalScore = displayScore.value;
+  if (finalScore > bestScore.value) {
+    bestScore.value = finalScore;
+    localStorage.setItem(BEST_SCORE_KEY, String(finalScore));
+  }
+};
+
+const updateGame = (time) => {
+  if (gameState.value !== "playing") return;
+  if (!lastFrameTime) lastFrameTime = time;
+  const delta = Math.min((time - lastFrameTime) / 1000, 0.034);
+  lastFrameTime = time;
+
+  score.value += delta * 10;
+  const speed = Math.min(150 + score.value * 0.7, 310);
+
+  if (dinoY.value > 0 || velocityY.value > 0) {
+    velocityY.value -= GRAVITY * delta;
+    dinoY.value = Math.max(0, dinoY.value + velocityY.value * delta);
+    if (dinoY.value === 0) velocityY.value = 0;
+  }
+
+  obstacles.value = obstacles.value
+    .map((obstacle) => ({ ...obstacle, x: obstacle.x - speed * delta }))
+    .filter((obstacle) => obstacle.x > -OBSTACLE_WIDTH);
+
+  nextObstacleIn -= delta;
+  if (nextObstacleIn <= 0) {
+    spawnObstacle();
+    nextObstacleIn = randomObstacleDelay();
+  }
+
+  if (checkCollision()) {
+    finishGame();
+    return;
+  }
+  animationFrame = requestAnimationFrame(updateGame);
+};
+
+const startGame = async () => {
+  stopLoop();
+  gameState.value = "playing";
+  score.value = 0;
+  dinoY.value = 0;
+  velocityY.value = 0;
+  obstacles.value = [];
+  nextObstacleIn = 1.1;
+  await nextTick();
+  updateGameWidth();
+  animationFrame = requestAnimationFrame(updateGame);
+};
+
+const jump = () => {
+  if (gameState.value === "playing" && dinoY.value === 0) velocityY.value = JUMP_VELOCITY;
+};
+
+const togglePause = () => {
+  if (gameState.value === "playing") {
+    gameState.value = "paused";
+    stopLoop();
+  } else if (gameState.value === "paused") {
+    gameState.value = "playing";
+    animationFrame = requestAnimationFrame(updateGame);
+  }
+};
+
+const handleAction = () => {
+  if (gameState.value === "ready" || gameState.value === "over") startGame();
+  else if (gameState.value === "paused") togglePause();
+  else jump();
+};
+
+const handleVisibilityChange = () => {
+  if (document.hidden && gameState.value === "playing") togglePause();
+};
+
+onMounted(() => {
+  const storedScore = Number(localStorage.getItem(BEST_SCORE_KEY));
+  bestScore.value = Number.isFinite(storedScore) ? storedScore : 0;
+  updateGameWidth();
+  resizeObserver = new ResizeObserver(updateGameWidth);
+  resizeObserver.observe(gameAreaRef.value);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+});
+
+onBeforeUnmount(() => {
+  stopLoop();
+  resizeObserver?.disconnect();
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
+});
 </script>
 
 <style lang="scss" scoped>
 .dino-game {
   width: 100%;
-  max-width: 600px;
   height: 200px;
-  margin: 0 auto;
-  border-radius: 16px;
+  padding: 0;
   overflow: hidden;
+  user-select: none;
 
   .game-area {
+    position: relative;
     width: 100%;
     height: 100%;
-    position: relative; 
-    background: linear-gradient(to bottom, #87ceeb 0%, #98fb98 80%, #8b4513 70%);
-    cursor: pointer;
-    outline: none;
     overflow: hidden;
+    cursor: pointer;
+    touch-action: manipulation;
+    background: linear-gradient(180deg, #8ed3ff 0%, #dff6ff 69%, #b8df82 70%, #87b957 100%);
 
-    // 游戏分数显示
-    .score-display {
+    &:focus-visible {
+      box-shadow: inset 0 0 0 3px var(--main-color);
+    }
+
+    &::after {
+      content: "";
       position: absolute;
-      top: 5px;
-      right: 5px;  
+      right: 0;
+      bottom: 15px;
+      left: 0;
+      height: 2px;
+      background: repeating-linear-gradient(90deg, #5d823d 0 14px, transparent 14px 24px);
+      opacity: 0.65;
+    }
+
+    &.playing::after {
+      animation: ground-move 0.45s linear infinite;
+    }
+  }
+
+  .game-header {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+    color: #284331;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pause-button {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    z-index: 30;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: #284331;
+    background: rgb(255 255 255 / 55%);
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+
+    &:hover {
+      background: rgb(255 255 255 / 85%);
+    }
+  }
+
+  .cloud {
+    position: absolute;
+    color: rgb(255 255 255 / 75%);
+    pointer-events: none;
+  }
+
+  .cloud-one {
+    top: 45px;
+    left: 18%;
+    font-size: 28px;
+  }
+
+  .cloud-two {
+    top: 72px;
+    left: 70%;
+    font-size: 20px;
+  }
+
+  .playing .cloud {
+    animation: cloud-move 10s linear infinite;
+  }
+
+  .game-ground {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .dino,
+  .obstacle {
+    position: absolute;
+    bottom: 16px;
+    z-index: 2;
+    will-change: transform;
+  }
+
+  .dino {
+    left: 20px;
+    width: 30px;
+    height: 32px;
+    font-size: 28px;
+    line-height: 32px;
+    scale: -1 1;
+  }
+
+  .obstacle {
+    left: 0;
+    width: 22px;
+    height: 30px;
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .game-tip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 20;
+    display: flex;
+    width: calc(100% - 40px);
+    max-width: 260px;
+    padding: 12px 16px;
+    border: 1px solid rgb(255 255 255 / 35%);
+    border-radius: 12px;
+    color: #fff;
+    background: rgb(25 48 36 / 78%);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+    transform: translate(-50%, -50%);
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(8px);
+
+    strong {
+      margin-bottom: 4px;
       font-size: 15px;
-      font-weight: bold;
-      color: #333;
-      //background: rgba(255, 255, 255, 0.9);
-      padding: 8px 12px;
-      border-radius: 8px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      z-index: 10;
     }
 
-    .game-ground {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
- 
-    .dino {
-      position: absolute;
-      left: 20px;
-      font-size: 28px;
-      z-index: 2;
-      transition: none;
-
-      &.jumping {
-        animation: bounce 0.1s infinite alternate;
-      }
-
-      &.dead {
-        animation: shake 0.5s;
-      }
-    }
-
-    .obstacle {
-      position: absolute;
-      bottom: 16px;
-      font-size: 24px;
-      z-index: 1;
-    }
-
-    .game-tip {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      animation: pulse 1.5s infinite;
-      z-index: 20;
+    span {
+      font-size: 11px;
+      text-align: center;
+      opacity: 0.85;
     }
   }
 }
 
-@keyframes bounce {
-  from {
-    transform: scaleY(1);
-  }
-  to {
-    transform: scaleY(0.8);
-  }
+@keyframes ground-move {
+  to { background-position-x: -24px; }
 }
 
-@keyframes shake {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(2deg);
-  }
-  75% {
-    transform: rotate(-2deg);
-  }
+@keyframes cloud-move {
+  to { translate: -340px 0; }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 0.5;
+@media (prefers-reduced-motion: reduce) {
+  .dino-game * {
+    animation-duration: 0.001ms !important;
   }
 }
 </style>
