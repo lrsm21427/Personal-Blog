@@ -4,8 +4,8 @@
     <div class="count-left">
       <span class="text"> 距离 </span>
       <span class="name">{{ theme.aside.countDown.data.name }}</span>
-      <span class="time"> {{ getDaysUntil(theme.aside.countDown.data.date) }} </span>
-      <span class="date">{{ theme.aside.countDown.data.date }}</span>
+      <span class="time"> {{ getDaysUntil(countDownDate) }} </span>
+      <span class="date">{{ countDownDate }}</span>
     </div>
     <div v-if="remainData" class="count-right">
       <div v-for="(item, tag, index) in remainData" :key="index" class="count-item">
@@ -30,20 +30,25 @@
 </template>
 
 <script setup>
-import { getTimeRemaining, getDaysUntil } from "@/utils/timeTools";
+import { getTimeRemaining, getDaysUntil, getNextCountdownDate } from "@/utils/timeTools";
 
 const { theme } = useData();
 
 // 倒计时数据
 const remainData = ref(null);
 const remainInterval = ref(null);
+const countDownDate = ref("");
+
+const updateData = () => {
+  remainData.value = getTimeRemaining();
+  const countDownData = theme.value.aside.countDown.data;
+  countDownDate.value = getNextCountdownDate(countDownData.dates || countDownData.date);
+};
 
 // 获取倒计时数据
 const getRemainData = () => {
-  remainData.value = getTimeRemaining();
-  remainInterval.value = setInterval(() => {
-    remainData.value = getTimeRemaining();
-  }, 1000);
+  updateData();
+  remainInterval.value = setInterval(updateData, 1000);
 };
 
 onMounted(() => {

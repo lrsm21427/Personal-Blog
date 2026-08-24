@@ -51,15 +51,39 @@ export const getTimeRemaining = () => {
 };
 
 /**
- * 计算当前日期距离指定日期的天数
- * @param {string} dateStr - 指定的日期，格式为 'YYYY-MM-DD'
+ * 获取最近一个尚未到期的倒计时日期
+ * @param {string|string[]} dateValue - 日期或日期列表，格式为 'YYYY-MM-DD'
+ * @param {dayjs.Dayjs} now - 当前时间
+ * @return {string} 最近的倒计时日期
+ */
+export const getNextCountdownDate = (dateValue, now = dayjs()) => {
+  const dates = (Array.isArray(dateValue) ? dateValue : [dateValue])
+    .map((date) => dayjs(date))
+    .filter((date) => date.isValid())
+    .sort((first, second) => first.valueOf() - second.valueOf());
+
+  if (!dates.length) return "";
+
+  const today = now.startOf("day");
+  const upcomingDate = dates.find((date) => !date.startOf("day").isBefore(today));
+  if (upcomingDate) return upcomingDate.format("YYYY-MM-DD");
+
+  // 普通周年纪念日未配置后续年份时，自动顺延到下一年。
+  let nextDate = dates.at(-1).year(today.year());
+  if (nextDate.startOf("day").isBefore(today)) nextDate = nextDate.add(1, "year");
+  return nextDate.format("YYYY-MM-DD");
+};
+
+/**
+ * 计算当前日期距离指定日期的自然日天数
+ * @param {string|string[]} dateValue - 日期或日期列表，格式为 'YYYY-MM-DD'
+ * @param {dayjs.ConfigType} nowValue - 用于测试的当前日期
  * @return {number} 返回的天数
  */
-export const getDaysUntil = (dateStr) => {
-  const now = dayjs();
-  const targetDate = dayjs(dateStr);
-  const daysUntil = targetDate.diff(now, "day");
-  return daysUntil;
+export const getDaysUntil = (dateValue, nowValue) => {
+  const now = dayjs(nowValue).startOf("day");
+  const targetDate = getNextCountdownDate(dateValue, now);
+  return targetDate ? dayjs(targetDate).diff(now, "day") : 0;
 };
 
 /**
