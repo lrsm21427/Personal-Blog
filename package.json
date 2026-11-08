@@ -50,6 +50,7 @@
     "@vite-pwa/vitepress": "^0.4.0",
     "@vueuse/core": "^11.1.0",
     "algoliasearch": "^5.8.0",
+    "animejs": "^4.5.0",
     "aplayer": "^1.10.1",
     "dayjs": "^1.11.13",
     "instantsearch.js": "^4.74.2",
