@@ -10,6 +10,9 @@ export const mainStore = defineStore("main", {
       bannerType: "half",
       // 加载状态
       loadingStatus: true,
+      // 首次打开文档时播放一次动画，不持久化到浏览器存储。
+      initialLoading: true,
+      routeLoading: false,
       // 滚动高度
       scrollData: {
         // 滚动高度

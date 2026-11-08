@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="fade" mode="out-in">
-      <div v-if="loadingStatus" class="loading" @click="loadingStatus = false">
+      <div v-if="loadingStatus" class="loading" @click="dismissLoading">
         <svg class="flower-color-defs" aria-hidden="true" width="0" height="0">
           <defs>
             <filter id="loading-petal-pink" color-interpolation-filters="sRGB">
@@ -99,6 +99,11 @@ const showTimeOut = ref(null);
 let flowerAnimation = null;
 let animationVersion = 0;
 let framesReady;
+let initialLoadingTimer = null;
+
+const dismissLoading = () => {
+  if (!store.initialLoading) loadingStatus.value = false;
+};
 
 const stopFlowerAnimation = () => {
   animationVersion++;
@@ -157,6 +162,15 @@ const startFlowerAnimation = async () => {
       renderFrame(frameState.value);
     },
   });
+
+  // 从帧图解码完成、动画开始播放时计时，避免图片下载耗掉展示时间。
+  if (store.initialLoading && initialLoadingTimer === null) {
+    initialLoadingTimer = setTimeout(() => {
+      initialLoadingTimer = null;
+      store.initialLoading = false;
+      loadingStatus.value = store.routeLoading;
+    }, 1000);
+  }
 };
 
 watch(
@@ -186,6 +200,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  clearTimeout(initialLoadingTimer);
   clearTimeout(showTimeOut.value);
   stopFlowerAnimation();
 });

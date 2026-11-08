@@ -58,6 +58,7 @@ const changeLoading = (option = {}) => {
   const store = mainStore();
   // 获取配置
   const { status = true, always = false } = option;
-  // 跳转期间显示，路由准备完成后立即关闭，不为播放动画额外等待。
-  store.loadingStatus = always && status;
+  // 首次进入由动画组件结束；后续路由完成后立即关闭。
+  store.routeLoading = always && status;
+  store.loadingStatus = store.initialLoading || store.routeLoading;
 };
