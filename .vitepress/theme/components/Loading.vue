@@ -2,7 +2,41 @@
   <Teleport to="body">
     <Transition name="fade" mode="out-in">
       <div v-if="loadingStatus" class="loading" @click="loadingStatus = false">
-        <img ref="flowerRef" class="flower" :src="frameUrls[0]" alt="页面加载中" />
+        <svg class="flower-color-defs" aria-hidden="true" width="0" height="0">
+          <defs>
+            <filter id="loading-petal-pink" color-interpolation-filters="sRGB">
+              <!-- 仅选中蓝色分量高于绿色的粉色区域，排除白底、枝条和绿叶。 -->
+              <feColorMatrix
+                in="SourceGraphic"
+                type="matrix"
+                values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 -12 12 0 0"
+                result="pinkMask"
+              />
+              <feColorMatrix
+                in="SourceGraphic"
+                type="matrix"
+                values="1 0 0 0 0.14  0 1.3 0 0 -0.031  0 0 1.55 0 -0.204  0 0 0 1 0"
+                result="lightPink"
+              />
+              <feComposite in="lightPink" in2="pinkMask" operator="in" result="petals" />
+              <feComposite in="SourceGraphic" in2="pinkMask" operator="out" result="rest" />
+              <feComposite in="petals" in2="rest" operator="arithmetic" k2="1" k3="1" />
+            </filter>
+          </defs>
+        </svg>
+        <div ref="flowerRef" class="flower" role="img" aria-label="页面加载中">
+          <img
+            v-for="(url, index) in frameUrls"
+            :key="url"
+            :src="url"
+            :style="{
+              visibility: index === 0 ? 'visible' : 'hidden',
+              transform: frameTransforms[index],
+            }"
+            alt=""
+            aria-hidden="true"
+          />
+        </div>
         <span :class="['tip', { show: showTip }]">一直显示？点击任意区域即可关闭</span>
       </div>
     </Transition>
@@ -18,15 +52,56 @@ const store = mainStore();
 const { loadingStatus } = storeToRefs(store);
 const flowerRef = ref(null);
 const frameUrls = Array.from(
-  { length: 8 },
-  (_, index) => `/loading-flower-bloom-frames/frame-${String(index + 1).padStart(2, "0")}.png`,
+  { length: 30 },
+  (_, index) => `/flower-branch-leaves-30/frame-${String(index + 1).padStart(2, "0")}.png`,
+);
+
+// 原始帧图为 192px。以不参与开花运动的右上枝端对齐，
+// 避免按花瓣外接框居中而把花瓣展开误判为整体位移。
+const branchTips = [
+  [176, 49],
+  [175, 49],
+  [174, 49],
+  [172, 49],
+  [171, 49],
+  [170, 49],
+  [176, 44],
+  [175, 43],
+  [174, 43],
+  [173, 43],
+  [172, 43],
+  [170, 43],
+  [176, 40],
+  [175, 39],
+  [174, 39],
+  [173, 39],
+  [171, 40],
+  [170, 39],
+  [177, 35],
+  [175, 35],
+  [174, 35],
+  [173, 35],
+  [172, 35],
+  [170, 36],
+  [177, 32],
+  [175, 32],
+  [174, 32],
+  [173, 32],
+  [172, 32],
+  [170, 32],
+];
+const frameTransforms = branchTips.map(
+  ([x, y]) => `translate(${((171 - x) / 192) * 100}%, ${((32 - y) / 192) * 100}%)`,
 );
 
 const showTip = ref(false);
 const showTimeOut = ref(null);
 let flowerAnimation = null;
+let animationVersion = 0;
+let framesReady;
 
 const stopFlowerAnimation = () => {
+  animationVersion++;
   flowerAnimation?.cancel();
   flowerAnimation = null;
 };
@@ -38,33 +113,48 @@ const startFlowerAnimation = async () => {
   if (!flower) return;
 
   stopFlowerAnimation();
-  flower.src = frameUrls[0];
+  const version = animationVersion;
+  const layers = Array.from(flower.querySelectorAll("img"));
+  let lastFrame = -1;
+  const renderFrame = (value) => {
+    const current = Math.max(0, Math.min(frameUrls.length - 1, Math.floor(value)));
+    if (current === lastFrame) return;
+    layers.forEach((layer, index) => {
+      layer.style.visibility = index === current ? "visible" : "hidden";
+    });
+    lastFrame = current;
+  };
+  renderFrame(0);
 
-  frameUrls.forEach((url) => {
-    const image = new Image();
-    image.src = url;
-  });
-
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    flower.src = frameUrls[frameUrls.length - 1];
-    return;
-  }
+  framesReady ??= Promise.all(
+    frameUrls.map(
+      (url) =>
+        new Promise((resolve) => {
+          const image = new Image();
+          image.onload = () =>
+            image
+              .decode()
+              .catch(() => {})
+              .then(resolve);
+          image.onerror = resolve;
+          image.src = url;
+        }),
+    ),
+  );
+  await framesReady;
+  if (version !== animationVersion || !loadingStatus.value || flower !== flowerRef.value) return;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const frameState = { value: 0 };
-  let lastFrame = -1;
-
   flowerAnimation = animate(frameState, {
     value: frameUrls.length - 0.001,
-    duration: 560,
-    ease: `steps(${frameUrls.length})`,
+    duration: reducedMotion ? 2000 : 1000,
+    ease: "linear",
     loop: true,
-    loopDelay: 220,
+    alternate: true,
+    loopDelay: reducedMotion ? 440 : 220,
     onUpdate: () => {
-      const frame = Math.min(frameUrls.length - 1, Math.floor(frameState.value));
-      if (frame !== lastFrame) {
-        flower.src = frameUrls[frame];
-        lastFrame = frame;
-      }
+      renderFrame(frameState.value);
     },
   });
 };
@@ -83,8 +173,17 @@ watch(
       stopFlowerAnimation();
     }
   },
-  { immediate: true },
+  { flush: "post" },
 );
+
+onMounted(() => {
+  if (loadingStatus.value) {
+    startFlowerAnimation();
+    showTimeOut.value = setTimeout(() => {
+      showTip.value = true;
+    }, 3000);
+  }
+});
 
 onBeforeUnmount(() => {
   clearTimeout(showTimeOut.value);
@@ -107,10 +206,24 @@ onBeforeUnmount(() => {
   background-color: var(--main-card-background);
 
   .flower {
+    position: relative;
+    mix-blend-mode: multiply;
     display: block;
     width: 92px;
     height: 92px;
-    object-fit: contain;
+    filter: url(#loading-petal-pink);
+    img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .flower-color-defs {
+    position: absolute;
+    pointer-events: none;
   }
 
   .tip {

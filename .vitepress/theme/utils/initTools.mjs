@@ -1,8 +1,6 @@
 import { mainStore } from "@/store";
-import { jumpRedirect } from "./commonTools.mjs";
 
 // 必要数据
-let loadingTimer = null;
 let lastPathName = null;
 
 // 是否仅触发跳转后
@@ -60,20 +58,6 @@ const changeLoading = (option = {}) => {
   const store = mainStore();
   // 获取配置
   const { status = true, always = false } = option;
-  // 开始加载
-  store.loadingStatus = status;
-  // 是否不结束
-  if (always) return;
-  // 随机延时结束
-  loadingTimer = setTimeout(
-    () => {
-      console.log("加载动画延时结束");
-      store.loadingStatus = false;
-      // 替换链接
-      // jumpRedirect(null, true);
-      // 清除定时器
-      clearTimeout(loadingTimer);
-    },
-    Math.floor(Math.random() * (800 - 260 + 1)) + 260,
-  );
+  // 跳转期间显示，路由准备完成后立即关闭，不为播放动画额外等待。
+  store.loadingStatus = always && status;
 };
